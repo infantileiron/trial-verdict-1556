@@ -1,4 +1,5 @@
-from sqlalchemy import Column,Integer,String,Float,JSON,Text,UniqueConstraint,ForeignKey
+from decimal import Decimal
+from sqlalchemy import Column,Integer,String,Float,JSON,Text,Numeric,UniqueConstraint,ForeignKey
 from src.config.database import Base
 class User(Base):
  __tablename__='users'
@@ -16,3 +17,12 @@ class Decision(Base):
 class Audit(Base):
  __tablename__='audits'
  id=Column(Integer,primary_key=True);actor=Column(String(100));action=Column(String(200));created=Column(String(40))
+
+class PrivacyBudget(Base):
+ __tablename__='privacy_budgets'
+ __table_args__=(UniqueConstraint('experiment_id',name='uq_privacy_budget_experiment'),)
+ id=Column(Integer,primary_key=True);experiment_id=Column(Integer,ForeignKey('experiments.id'),nullable=False);total_epsilon=Column(Numeric(12,6),nullable=False,default=Decimal('3.000000'));epsilon_per_release=Column(Numeric(12,6),nullable=False,default=Decimal('1.000000'));used_epsilon=Column(Numeric(12,6),nullable=False,default=Decimal('0.000000'));updated_at=Column(String(40),default='')
+class DpRelease(Base):
+ __tablename__='dp_releases'
+ __table_args__=(UniqueConstraint('experiment_id','sample_fingerprint',name='uq_dp_release_experiment_sample'),)
+ id=Column(Integer,primary_key=True);experiment_id=Column(Integer,ForeignKey('experiments.id'),nullable=False);sample_fingerprint=Column(String(64),nullable=False);sample_ref=Column(String(16),nullable=False);status=Column(String(20),default='queued');epsilon=Column(Numeric(12,6),nullable=False);noise_seed=Column(String(64),nullable=False);aggregate=Column(JSON,nullable=False);result=Column(JSON,nullable=True);error=Column(Text,default='');requested_by=Column(String(100),default='');delivered_by=Column(String(100),default='');delivered_at=Column(String(40),default='');attempts=Column(Integer,default=0);created_at=Column(String(40),default='');started_at=Column(String(40),default='');completed_at=Column(String(40),default='')

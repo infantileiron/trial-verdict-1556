@@ -5,6 +5,7 @@ x-app: &app
     DATABASE_URL: mysql+pymysql://trial:${DB_PASSWORD:-trial_local_demo}@db:3306/trial
     REDIS_URL: redis://redis:6379/0
     JWT_SECRET: ${JWT_SECRET:-trial-demo-change-in-production-3104}
+    DP_FINGERPRINT_KEY: ${DP_FINGERPRINT_KEY:-trial-dp-fingerprint-key-change-in-production}
     SEED_DEMO: ${SEED_DEMO:-true}
   volumes: [artifacts:/artifacts]
   depends_on:

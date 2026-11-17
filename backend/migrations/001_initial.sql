@@ -2,3 +2,7 @@
 -- Natural keys: users.email, experiments.code, events(experiment_id,user_key,kind).
 -- Foreign keys connect events and decisions to experiment definitions.
 -- Decisions.snapshot stores the frozen experimental protocol and event set.
+-- Privacy summary (differential privacy): sqlalchemy metadata also creates these.
+-- privacy_budgets: one row per experiment; total_epsilon >= used_epsilon, epsilon_per_release <= total_epsilon.
+-- dp_releases: one row per (experiment_id, sample_fingerprint); fingerprint is HMAC of frozen events (no raw detail),
+--   epsilon is charged once at claim time; noise is derived from the persisted fingerprint so retries never change it.

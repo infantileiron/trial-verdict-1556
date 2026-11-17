@@ -1,6 +1,7 @@
 from datetime import datetime,timezone,timedelta
 from src.config.database import Base,engine,Session
-from src.models.entities import User,Experiment,Event
+from src.models.entities import User,Experiment,Event,PrivacyBudget
+from src.constants.privacy import DEFAULT_TOTAL_EPSILON,DEFAULT_EPSILON_PER_RELEASE
 from src.utils.security import hash_password
 
 def seed():
@@ -21,5 +22,8 @@ def seed():
      group='A' if i<600 else 'B';key=f'LJ-U{i+1:04}';activated=(i<120 if group=='A' else i-600<180)
      for kind in ['exposure']+(['activation'] if activated else []):
       if not s.query(Event).filter_by(experiment_id=exp.id,user_key=key,kind=kind).first():s.add(Event(experiment_id=exp.id,user_key=key,group=group,kind=kind,occurred_at=stamp))
-  s.commit();print({'users':s.query(User).count(),'experiments':s.query(Experiment).count(),'events':s.query(Event).count()})
+  # 每个实验预设总隐私预算与单次额度；已存在则保留（不重置已用额度）。
+  for exp in s.query(Experiment).all():
+   if not s.query(PrivacyBudget).filter_by(experiment_id=exp.id).first():s.add(PrivacyBudget(experiment_id=exp.id,total_epsilon=DEFAULT_TOTAL_EPSILON,epsilon_per_release=DEFAULT_EPSILON_PER_RELEASE,used_epsilon=0))
+  s.commit();print({'users':s.query(User).count(),'experiments':s.query(Experiment).count(),'events':s.query(Event).count(),'budgets':s.query(PrivacyBudget).count()})
 if __name__=='__main__':seed()
